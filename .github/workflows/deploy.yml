@@ -20,11 +20,11 @@ jobs:
       - name: Deploy files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          server: http://wagonow.com/
+          username: githubaction@wagonow.com
+          password: GNR.oC#YhAvy
+          port: 22
+          server-dir: /home/wagonow/public_html/
           exclude: |
             **/.git*
             **/.git*/**
