@@ -29,6 +29,8 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            **/vendor/**
+            **/storage/**
             .env
             .env.example
 
