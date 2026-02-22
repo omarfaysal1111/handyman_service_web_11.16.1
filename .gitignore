@@ -18,23 +18,11 @@ yarn-error.log
 *.cache
 .DS_Store
 
+# Large compiled/vendor frontend assets (run `npm run dev` to regenerate)
+/public/vendor
+/public/frontend
+/public/css
+/public/js
+/public/mix-manifest.json
 
-# Below Comments For Design Style & Scripts
-# /public/css/*
-# !/public/css/.gitkeep
-# /public/js/core/*
-# !/public/js/core/.gitkeep
-
-# /public/js/*.js*
-# !/public/js/.gitkeep
-
-# /public/js/iqonic-script/*.min.js*
-# !/public/js/iqonic-script/.gitkeep
-# !/public/js/setting-init.js
-
-# /public/modules/**/*
-# !/public/modules/.gitkeep
-# /public/mix-manifest.json
-node_modules
-node_modules
 /storage/media-library/**/*
