@@ -24,7 +24,7 @@ jobs:
           username: githubaction@wagonow.com
           password: GNR.oC#YhAvy
           port: 21
-          server-dir: /
+          server-dir: /home/wagonow/public_html/
           exclude: |
             **/.git*
             **/.git*/**
@@ -34,20 +34,7 @@ jobs:
             .env
             .env.example
 
-      - name: Run post-deploy commands via SSH (optional)
-        uses: appleboy/ssh-action@v1.0.3
-        continue-on-error: true
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT }}
-          command_timeout: 10m
-          script: |
-            cd ${{ secrets.SERVER_PATH }}
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            php artisan queue:restart 2>/dev/null || true
-            echo "=== Post-deploy complete! ==="
+      - name: Trigger post-deployment script
+        run: |
+          echo "Triggering deployment script..."
+          curl -s "https://app.wagonow.com/deploy.php?token=wagonow_deploy_2024_secret"
