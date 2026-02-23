@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Secure Deployment Script
+ * Secure Deployment Script & Filesystem Explorer
  * URL: https://app.wagonow.com/deploy.php?token=YOUR_SECRET_TOKEN
  *
  * ⚠️  DELETE THIS FILE after deployment is fixed!
@@ -18,15 +18,15 @@ if ($token !== DEPLOY_TOKEN) {
 }
 
 // ─── Config ──────────────────────────────────────────────────────────────────
-$projectRoot = dirname(__DIR__); // /home/wagonow/public_html
-$phpBin      = '/usr/local/bin/lsphp'; // Use explicit path found in diagnostics
+$projectRoot = dirname(__DIR__);
+$phpBin      = '/usr/local/bin/lsphp'; 
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 Robust Deploy — Wagonow</title>
+    <title>🚀 Filesystem Explorer — Wagonow</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0d1117; color: #e6edf3; font-family: monospace; padding: 20px; }
@@ -42,15 +42,14 @@ $phpBin      = '/usr/local/bin/lsphp'; // Use explicit path found in diagnostics
     </style>
 </head>
 <body>
-    <h1>🚀 Robust Deployment Script — <?= date('Y-m-d H:i:s') ?></h1>
+    <h1>🚀 Filesystem Explorer — <?= date('Y-m-d H:i:s') ?></h1>
 
     <div class="info">
         <strong>Environment Info:</strong><br>
         PHP User: <?= get_current_user() ?><br>
-        Project Root: <?= htmlspecialchars($projectRoot) ?><br>
+        Project Root (detected): <?= htmlspecialchars($projectRoot) ?><br>
         Current Dir: <?= htmlspecialchars(__DIR__) ?><br>
         PHP Binary: <?= htmlspecialchars($phpBin) ?><br>
-        Exec/Shell_Exec: <?= (function_exists('exec') && function_exists('shell_exec')) ? '✅ Enabled' : '❌ Disabled' ?><br>
     </div>
 
 <?php
@@ -58,65 +57,36 @@ if (!function_exists('exec')) {
     die("<div class='warn'>❌ ERROR: PHP 'exec' function is disabled.</div>");
 }
 
-// ─── Helper Functions ─────────────────────────────────────────────────────────
-
 function run_cmd($label, $cmd) {
     echo "<div class='step'>";
-    echo "<div class='step-title'>⏳ Running: {$label}...</div>";
-    flush(); if (ob_get_level() > 0) ob_flush();
-
+    echo "<div class='step-title ok'>🔍 {$label}</div>";
+    
     $output = [];
     $exitCode = 0;
-    exec($cmd, $output, $exitCode);
+    exec($cmd . " 2>&1", $output, $exitCode);
 
-    $ok     = ($exitCode === 0);
-    $status = $ok ? 'ok' : 'fail';
-    $icon   = $ok ? '✅' : '❌';
-    $text   = implode("\n", $output) ?: '(no output)';
-
-    // Update title with status
-    echo "<script>document.querySelectorAll('.step-title').item(document.querySelectorAll('.step-title').length - 1).className = 'step-title {$status}';</script>";
-    echo "<script>document.querySelectorAll('.step-title').item(document.querySelectorAll('.step-title').length - 1).innerHTML = '{$icon} {$label} (exit: {$exitCode})';</script>";
-    
+    $text = implode("\n", $output) ?: '(no output)';
     echo "<div class='step-body'>" . htmlspecialchars($text) . "</div>";
     echo "</div>";
     
     flush(); if (ob_get_level() > 0) ob_flush();
-    return $ok;
+    return $exitCode === 0;
 }
 
-// ─── Execution ───────────────────────────────────────────────────────────────
+// ─── Exploration ─────────────────────────────────────────────────────────────
 
-$allOk = true;
+run_cmd("Current Files", "ls -lah");
+run_cmd("Parent Directory (..)", "ls -lah ..");
+run_cmd("Grandparent Directory (../..)", "ls -lah ../..");
+run_cmd("Check common public_html", "ls -lah /home/wagonow/public_html 2>/dev/null || echo 'Access denied or not found'");
+run_cmd("Whoami & Groups", "id");
+run_cmd("Find composer", "which composer");
+run_cmd("Check /usr/local/bin", "ls -lah /usr/local/bin | grep composer");
 
-// 1. Check if global composer exists
-$hasGlobalComposer = false;
-exec("composer --version", $trash, $exitCode);
-if ($exitCode === 0) {
-    $hasGlobalComposer = true;
-    $composerCmd = "composer";
-} else {
-    // 2. Try to download composer.phar if not present
-    $composerPath = $projectRoot . '/composer.phar';
-    if (!file_exists($composerPath)) {
-        $allOk = $allOk && run_cmd("Download composer.phar", "cd {$projectRoot} && curl -sS https://getcomposer.org/installer | {$phpBin}");
-    }
-    $composerCmd = "{$phpBin} {$composerPath}";
-}
-
-// 3. Run Commands
-$allOk = $allOk && run_cmd("Composer Install", "cd {$projectRoot} && {$composerCmd} install --no-dev --optimize-autoloader --no-interaction 2>&1");
-$allOk = $allOk && run_cmd("Artisan Config Cache", "cd {$projectRoot} && {$phpBin} artisan config:cache 2>&1");
-$allOk = $allOk && run_cmd("Artisan Route Cache", "cd {$projectRoot} && {$phpBin} artisan route:cache 2>&1");
-$allOk = $allOk && run_cmd("Artisan View Cache", "cd {$projectRoot} && {$phpBin} artisan view:cache 2>&1");
-
-if ($allOk): ?>
-    <div class="done">✅ All commands completed successfully! Your app should be working now.</div>
-<?php else: ?>
-    <div class="warn">❌ Some commands failed.</div>
-<?php endif; ?>
+?>
 
 </body>
 </html>
+
 
 
