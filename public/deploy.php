@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Secure Deployment Script & Filesystem Explorer
+ * Secure Deployment Script - v5 Robust
  * URL: https://app.wagonow.com/deploy.php?token=YOUR_SECRET_TOKEN
  *
  * ⚠️  DELETE THIS FILE after deployment is fixed!
@@ -26,7 +26,7 @@ $phpBin      = '/usr/local/bin/lsphp';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 Filesystem Explorer — Wagonow</title>
+    <title>🚀 Final Fix Deploy — Wagonow</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0d1117; color: #e6edf3; font-family: monospace; padding: 20px; }
@@ -42,13 +42,12 @@ $phpBin      = '/usr/local/bin/lsphp';
     </style>
 </head>
 <body>
-    <h1>🚀 Filesystem Explorer — <?= date('Y-m-d H:i:s') ?></h1>
+    <h1>🚀 Final Deployment Fix — <?= date('Y-m-d H:i:s') ?></h1>
 
     <div class="info">
         <strong>Environment Info:</strong><br>
         PHP User: <?= get_current_user() ?><br>
-        Project Root (detected): <?= htmlspecialchars($projectRoot) ?><br>
-        Current Dir: <?= htmlspecialchars(__DIR__) ?><br>
+        Project Root: <?= htmlspecialchars($projectRoot) ?><br>
         PHP Binary: <?= htmlspecialchars($phpBin) ?><br>
     </div>
 
@@ -59,34 +58,62 @@ if (!function_exists('exec')) {
 
 function run_cmd($label, $cmd) {
     echo "<div class='step'>";
-    echo "<div class='step-title ok'>🔍 {$label}</div>";
-    
+    echo "<div class='step-title'>⏳ Running: {$label}...</div>";
+    flush(); if (ob_get_level() > 0) ob_flush();
+
     $output = [];
     $exitCode = 0;
     exec($cmd . " 2>&1", $output, $exitCode);
 
-    $text = implode("\n", $output) ?: '(no output)';
+    $ok     = ($exitCode === 0);
+    $status = $ok ? 'ok' : 'fail';
+    $icon   = $ok ? '✅' : '❌';
+    $text   = implode("\n", $output) ?: '(no output)';
+
+    // Update title with status
+    echo "<script>document.querySelectorAll('.step-title').item(document.querySelectorAll('.step-title').length - 1).className = 'step-title {$status}';</script>";
+    echo "<script>document.querySelectorAll('.step-title').item(document.querySelectorAll('.step-title').length - 1).innerHTML = '{$icon} {$label} (exit: {$exitCode})';</script>";
+    
     echo "<div class='step-body'>" . htmlspecialchars($text) . "</div>";
     echo "</div>";
     
     flush(); if (ob_get_level() > 0) ob_flush();
-    return $exitCode === 0;
+    return $ok;
 }
 
-// ─── Exploration ─────────────────────────────────────────────────────────────
+// ─── Execution ───────────────────────────────────────────────────────────────
 
-run_cmd("Current Files", "ls -lah");
-run_cmd("Parent Directory (..)", "ls -lah ..");
-run_cmd("Grandparent Directory (../..)", "ls -lah ../..");
-run_cmd("Check common public_html", "ls -lah /home/wagonow/public_html 2>/dev/null || echo 'Access denied or not found'");
-run_cmd("Whoami & Groups", "id");
-run_cmd("Find composer", "which composer");
-run_cmd("Check /usr/local/bin", "ls -lah /usr/local/bin | grep composer");
+$allOk = true;
 
-?>
+// 1. Clear bootstrap/cache (prevents 'Class not found' from cached providers)
+run_cmd("Clear Bootstrap Cache", "rm -f {$projectRoot}/bootstrap/cache/*.php");
+
+// 2. Setup Composer
+$composerPath = $projectRoot . '/composer.phar';
+if (!file_exists($composerPath)) {
+    run_cmd("Download composer.phar", "cd {$projectRoot} && curl -sS https://getcomposer.org/installer | {$phpBin}");
+}
+$composerCmd = "{$phpBin} {$composerPath}";
+
+// 3. Main Installation
+$allOk = $allOk && run_cmd("Composer Install (No Dev)", "cd {$projectRoot} && {$composerCmd} install --no-dev --optimize-autoloader --no-interaction");
+
+// 4. Artisan Tasks
+if (file_exists($projectRoot . '/artisan')) {
+    run_cmd("Artisan Config Cache", "cd {$projectRoot} && {$phpBin} artisan config:cache");
+    run_cmd("Artisan Route Cache", "cd {$projectRoot} && {$phpBin} artisan route:cache");
+    run_cmd("Artisan View Cache", "cd {$projectRoot} && {$phpBin} artisan view:cache");
+}
+
+if ($allOk): ?>
+    <div class="done">✅ Final Fix Complete! Refresh your home page now.</div>
+<?php else: ?>
+    <div class="warn">❌ Installation failed. Check composer error above.</div>
+<?php endif; ?>
 
 </body>
 </html>
+
 
 
 
