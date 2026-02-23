@@ -19,14 +19,14 @@ if ($token !== DEPLOY_TOKEN) {
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 $projectRoot = dirname(__DIR__); // /home/wagonow/public_html
-$phpBin      = PHP_BINARY ?: 'php';
+$phpBin      = '/usr/local/bin/lsphp'; // Use explicit path found in diagnostics
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 Debug Deploy — Wagonow</title>
+    <title>🚀 Robust Deploy — Wagonow</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0d1117; color: #e6edf3; font-family: monospace; padding: 20px; }
@@ -42,7 +42,7 @@ $phpBin      = PHP_BINARY ?: 'php';
     </style>
 </head>
 <body>
-    <h1>🚀 Debug Deployment Script — <?= date('Y-m-d H:i:s') ?></h1>
+    <h1>🚀 Robust Deployment Script — <?= date('Y-m-d H:i:s') ?></h1>
 
     <div class="info">
         <strong>Environment Info:</strong><br>
@@ -50,58 +50,73 @@ $phpBin      = PHP_BINARY ?: 'php';
         Project Root: <?= htmlspecialchars($projectRoot) ?><br>
         Current Dir: <?= htmlspecialchars(__DIR__) ?><br>
         PHP Binary: <?= htmlspecialchars($phpBin) ?><br>
-        Exec Enabled: <?= function_exists('exec') ? '✅ Yes' : '❌ No' ?><br>
-        Shell_Exec Enabled: <?= function_exists('shell_exec') ? '✅ Yes' : '❌ No' ?><br>
-        Composer.json: <?= file_exists($projectRoot . '/composer.json') ? '✅ Found' : '❌ Missing' ?><br>
-        Vendor Dir: <?= is_dir($projectRoot . '/vendor') ? '✅ Found' : '❌ Missing' ?><br>
-        Storage Dir: <?= is_dir($projectRoot . '/storage') ? '✅ Found' : '❌ Missing' ?><br>
+        Exec/Shell_Exec: <?= (function_exists('exec') && function_exists('shell_exec')) ? '✅ Enabled' : '❌ Disabled' ?><br>
     </div>
 
 <?php
 if (!function_exists('exec')) {
-    echo "<div class='warn'>❌ ERROR: PHP 'exec' function is disabled. Deployment cannot proceed.</div>";
-} else {
-    // ─── Commands to run ─────────────────────────────────────────────────────────
-    $commands = [
-        'List Files'               => "ls -lah {$projectRoot}",
-        'Check Composer'           => "composer --version 2>&1",
-        'Composer Install'         => "cd {$projectRoot} && composer install --no-dev --optimize-autoloader --no-interaction 2>&1",
-        'Artisan Version'          => "cd {$projectRoot} && {$phpBin} artisan --version 2>&1",
-        'Config Cache'             => "cd {$projectRoot} && {$phpBin} artisan config:cache 2>&1",
-        'Route Cache'              => "cd {$projectRoot} && {$phpBin} artisan route:cache 2>&1",
-        'View Cache'               => "cd {$projectRoot} && {$phpBin} artisan view:cache 2>&1",
-    ];
-
-    $allOk = true;
-
-    foreach ($commands as $label => $cmd) {
-        $output = [];
-        $exitCode = 0;
-
-        exec($cmd, $output, $exitCode);
-
-        $ok     = ($exitCode === 0);
-        $allOk  = $allOk && $ok;
-        $status = $ok ? 'ok' : 'fail';
-        $icon   = $ok ? '✅' : '❌';
-        $text   = implode("\n", $output) ?: '(no output)';
-
-        echo "<div class='step'>";
-        echo "<div class='step-title {$status}'>{$icon} {$label} (exit: {$exitCode})</div>";
-        echo "<div class='step-body'>" . htmlspecialchars($text) . "</div>";
-        echo "</div>";
-        flush();
-        if (ob_get_level() > 0) ob_flush();
-    }
-
-    if ($allOk): ?>
-        <div class="done">✅ All commands completed successfully!</div>
-    <?php else: ?>
-        <div class="warn">❌ Some commands failed.</div>
-    <?php endif;
+    die("<div class='warn'>❌ ERROR: PHP 'exec' function is disabled.</div>");
 }
-?>
+
+// ─── Helper Functions ─────────────────────────────────────────────────────────
+
+function run_cmd($label, $cmd) {
+    echo "<div class='step'>";
+    echo "<div class='step-title'>⏳ Running: {$label}...</div>";
+    flush(); if (ob_get_level() > 0) ob_flush();
+
+    $output = [];
+    $exitCode = 0;
+    exec($cmd, $output, $exitCode);
+
+    $ok     = ($exitCode === 0);
+    $status = $ok ? 'ok' : 'fail';
+    $icon   = $ok ? '✅' : '❌';
+    $text   = implode("\n", $output) ?: '(no output)';
+
+    // Update title with status
+    echo "<script>document.querySelectorAll('.step-title').item(document.querySelectorAll('.step-title').length - 1).className = 'step-title {$status}';</script>";
+    echo "<script>document.querySelectorAll('.step-title').item(document.querySelectorAll('.step-title').length - 1).innerHTML = '{$icon} {$label} (exit: {$exitCode})';</script>";
+    
+    echo "<div class='step-body'>" . htmlspecialchars($text) . "</div>";
+    echo "</div>";
+    
+    flush(); if (ob_get_level() > 0) ob_flush();
+    return $ok;
+}
+
+// ─── Execution ───────────────────────────────────────────────────────────────
+
+$allOk = true;
+
+// 1. Check if global composer exists
+$hasGlobalComposer = false;
+exec("composer --version", $trash, $exitCode);
+if ($exitCode === 0) {
+    $hasGlobalComposer = true;
+    $composerCmd = "composer";
+} else {
+    // 2. Try to download composer.phar if not present
+    $composerPath = $projectRoot . '/composer.phar';
+    if (!file_exists($composerPath)) {
+        $allOk = $allOk && run_cmd("Download composer.phar", "cd {$projectRoot} && curl -sS https://getcomposer.org/installer | {$phpBin}");
+    }
+    $composerCmd = "{$phpBin} {$composerPath}";
+}
+
+// 3. Run Commands
+$allOk = $allOk && run_cmd("Composer Install", "cd {$projectRoot} && {$composerCmd} install --no-dev --optimize-autoloader --no-interaction 2>&1");
+$allOk = $allOk && run_cmd("Artisan Config Cache", "cd {$projectRoot} && {$phpBin} artisan config:cache 2>&1");
+$allOk = $allOk && run_cmd("Artisan Route Cache", "cd {$projectRoot} && {$phpBin} artisan route:cache 2>&1");
+$allOk = $allOk && run_cmd("Artisan View Cache", "cd {$projectRoot} && {$phpBin} artisan view:cache 2>&1");
+
+if ($allOk): ?>
+    <div class="done">✅ All commands completed successfully! Your app should be working now.</div>
+<?php else: ?>
+    <div class="warn">❌ Some commands failed.</div>
+<?php endif; ?>
 
 </body>
 </html>
+
 

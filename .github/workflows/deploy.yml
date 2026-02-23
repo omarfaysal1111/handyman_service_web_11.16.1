@@ -24,7 +24,7 @@ jobs:
           username: githubaction@wagonow.com
           password: GNR.oC#YhAvy
           port: 21
-          server-dir: /home/wagonow/public_html/
+          server-dir: ./
           exclude: |
             **/.git*
             **/.git*/**
