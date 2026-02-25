@@ -142,6 +142,37 @@ class PaymentController extends Controller
 
         return comman_message_response($message, 200);
     }
+
+    public function storeManualPayment(Request $request)
+    {
+        $request->validate([
+            'booking_id' => 'required',
+            'customer_id' => 'required',
+            'total_amount' => 'required',
+            'payment_type' => 'required|in:instapay,vodafone_cash',
+            'receipt' => 'required|mimes:jpeg,png,jpg,pdf|max:5120',
+        ]);
+
+        $data = $request->except('receipt');
+        $data['payment_status'] = 'pending';
+        $data['datetime'] = isset($request->datetime) ? date('Y-m-d H:i:s', strtotime($request->datetime)) : date('Y-m-d H:i:s');
+
+        $result = Payment::create($data);
+        
+        if ($request->hasFile('receipt')) {
+            storeMediaFile($result, $request->file('receipt'), 'payment_receipt');
+        }
+
+        $booking = Booking::find($request->booking_id);
+        if ($booking) {
+            $booking->payment_id = $result->id;
+            $booking->update();
+        }
+
+        $message = 'Receipt uploaded successfully. Pending admin approval.';
+        return comman_message_response($message, 200);
+    }
+
     public function paymentList(Request $request)
     {
         $payment = Payment::myPayment()->with('booking');

@@ -26,3 +26,4 @@ yarn-error.log
 /public/mix-manifest.json
 
 /storage/media-library/**/*
+vendor.zip

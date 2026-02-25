@@ -60,6 +60,7 @@ use App\Http\Controllers\Installer\PermissionsController;
 use App\Http\Controllers\NotificationTemplatesController;
 use App\Http\Controllers\Installer\RequirementsController;
 use App\Http\Controllers\ProviderAddressMappingController;
+use App\Http\Controllers\DriverTrackingController;
 
 
 
@@ -655,6 +656,9 @@ Route::group(['middleware' => ['permission:helpdesk list']], function () {
 Route::post('/upload-zip', [HomeController::class, 'uploadZip'])->name('upload.zip');
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('driver-tracking/{bookingId}', [DriverTrackingController::class, 'show'])->name('driver.tracking');
+    Route::get('driver-tracking-status/{bookingId}', [DriverTrackingController::class, 'status'])->name('driver.tracking.status');
+
     Route::resource('promotional-banner', PromotionalBannerController::class);
     Route::get('promotional-banner', [PromotionalBannerController::class, 'index'])->name('promotional-banner');
     Route::get('promotional-banner-index-data', [PromotionalBannerController::class, 'index_data'])->name('promotional-banner.index_data');

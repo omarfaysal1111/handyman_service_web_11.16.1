@@ -21,8 +21,8 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 199.188.201.22
-          username: githubaction@wagonow.com
-          password: GNR.oC#YhAvy
+          username: handy@wagonow.com
+          password: 9_9P2lXGnpK_
           port: 21
           server-dir: ./
           exclude: |

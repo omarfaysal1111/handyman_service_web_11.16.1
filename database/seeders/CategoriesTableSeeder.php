@@ -245,6 +245,18 @@ class CategoriesTableSeeder extends Seeder
                 'category_image' => public_path('/images/category-images/remote_service.png'),
                 'updated_at' => '2023-09-04 13:05:01',
             ],
+            [
+                'color' => '#000000',
+                'created_at' => '2026-02-22 15:00:00',
+                'deleted_at' => NULL,
+                'description' => 'Book reliable car and driver services for pickups, drops, and city rides. 🚗🧑‍✈️',
+                'id' => 28,
+                'is_featured' => 1,
+                'name' => 'Car / Driver',
+                'status' => 1,
+                'category_image' => public_path('/images/category-images/automotive_care.png'),
+                'updated_at' => '2026-02-22 15:00:00',
+            ],
         ];
         
         foreach ($data as $key => $val) {

@@ -51,6 +51,7 @@ use App\Http\Resources\API\{
     TypeResource,
     ShopResource,
 };
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PromotionalBannerResource;
 use App\Traits\TranslationTrait;
 
@@ -58,6 +59,13 @@ use App\Traits\ZoneTrait;
 
 class DashboardController extends Controller
 {
+    private function monthSqlExpression(string $column = 'updated_at'): string
+    {
+        return DB::getDriverName() === 'sqlite'
+            ? "strftime('%m', {$column})"
+            : "DATE_FORMAT({$column}, '%m')";
+    }
+
     use TranslationTrait;
     use ZoneTrait;
 
@@ -452,7 +460,7 @@ class DashboardController extends Controller
             }
             $remaining_payout  = $ProviderEarning;
             //$remaining_payout  = CommissionEarning::where('employee_id',$provider->id)->where('commission_status', 'unpaid')->sum('commission_amount') ?? 0;
-            $revenuedata = ProviderPayout::selectRaw('sum(amount) as total , DATE_FORMAT(updated_at , "%m") as month')
+            $revenuedata = ProviderPayout::selectRaw('sum(amount) as total, ' . $this->monthSqlExpression('updated_at') . ' as month')
                 ->where('provider_id', $user->id)
                 ->whereYear('updated_at', date('Y'))
                 // ->whereIn('commission_status', ['paid'])
@@ -554,7 +562,7 @@ class DashboardController extends Controller
         $total_revenue    = HandymanPayout::where('handyman_id', auth()->user()->id)->sum('amount') ?? 0;
         $remaining_payout  = CommissionEarning::where('employee_id', $handyman->id)->where('commission_status', 'unpaid')->sum('commission_amount') ?? 0;
 
-        $revenuedata = HandymanPayout::selectRaw('sum(amount) as total , DATE_FORMAT(updated_at , "%m") as month')
+        $revenuedata = HandymanPayout::selectRaw('sum(amount) as total, ' . $this->monthSqlExpression('updated_at') . ' as month')
             ->where('handyman_id', auth()->user()->id)
             ->whereYear('updated_at', date('Y'))
             // ->whereIn('commission_status', ['unpaid', 'paid'])

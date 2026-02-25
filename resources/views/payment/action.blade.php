@@ -1,9 +1,14 @@
 <?php
 $auth_user= authSession();
 ?>
-{{-- {{ $earningData->id}} --}}
 {{ html()->form('DELETE', route('payment.destroy', $payment->id))->attribute('data--submit', 'payment'.$payment->id)->open() }}
 <div class="d-flex justify-content-end align-items-center">
+@if($payment->hasMedia('payment_receipt'))
+    <a class="me-3" href="{{ getSingleMedia($payment, 'payment_receipt') }}" target="_blank"
+        title="View Receipt">
+        <i class="far fa-file-image text-primary"></i>
+    </a>
+@endif
 @if(auth()->user()->hasAnyRole(['admin']))
     <a class="me-3" href="{{ route('payment.destroy', $payment->id) }}" data--submit="payment{{$payment->id}}" 
         data--confirmation='true' 

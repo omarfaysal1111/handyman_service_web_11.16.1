@@ -23,7 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 require __DIR__ . '/admin-api.php';
 
-
+//727DAE59
 
 
 Route::get('remove-session', [API\CommanController::class, 'RemoveSession']);
@@ -124,6 +124,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('remove-file', [App\Http\Controllers\HomeController::class, 'removeFile']);
     Route::get('logout', [API\User\UserController::class, 'logout']);
     Route::post('save-payment', [API\PaymentController::class, 'savePayment']);
+    Route::post('save-manual-payment', [API\PaymentController::class, 'storeManualPayment']);
 
     Route::get('payment-list', [API\PaymentController::class, 'paymentList']);
     Route::post('transfer-payment', [API\PaymentController::class, 'transferPayment']);
@@ -243,6 +244,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('address-list', [App\Http\Controllers\AddressController::class, 'index']);
     Route::get('address/{id}', [App\Http\Controllers\AddressController::class, 'show']);
     Route::post('address-delete/{id}', [App\Http\Controllers\AddressController::class, 'destroy']);
+
+    // Driver discovery and tracking APIs
+    Route::post('find-drivers', [API\DriverController::class, 'findDrivers']);
+    Route::post('request-driver', [API\DriverController::class, 'requestDriver']);
+    Route::get('driver-booking-status', [API\DriverController::class, 'driverBookingStatus']);
+    Route::post('cancel-driver-request', [API\DriverController::class, 'cancelDriverRequest']);
+    Route::post('update-driver-location', [API\DriverController::class, 'updateDriverLocation']);
 
     // PhonePe routes - support both v1 and v2 based on configuration
     Route::post('/phonepe/initiate', [API\BookingController::class, 'initiate']);

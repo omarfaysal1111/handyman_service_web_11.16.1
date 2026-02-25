@@ -88,7 +88,11 @@ class HomeController extends Controller
         $setting = Setting::getValueByKey('site-setup', 'site-setup');
         $digitafter_decimal_point = $setting ? $setting->digitafter_decimal_point : "2";
         if ($user->hasRole('provider')) {
-            $revenuedata = ProviderPayout::selectRaw('sum(amount) as total , DATE_FORMAT(updated_at , "%m") as month')
+            $monthExpression = DB::getDriverName() === 'sqlite'
+                ? "strftime('%m', updated_at)"
+                : "DATE_FORMAT(updated_at, '%m')";
+
+            $revenuedata = ProviderPayout::selectRaw("sum(amount) as total, {$monthExpression} as month")
                 ->where('provider_id', $user->id)
                 ->whereYear('updated_at', date('Y'))
                 // ->whereIn('commission_status', ['paid'])
