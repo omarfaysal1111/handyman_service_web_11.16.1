@@ -28,35 +28,7 @@ trait ZoneTrait
 
     public function getNearbyZoneserviceIds($serviceId, $lat, $lng)
     {
-        $zoneMappings = ServiceZoneMapping::with('zone')
-            ->where('service_id', $serviceId)
-            ->pluck('zone_id')
-            ->toArray();
-
-        $zones = ServiceZone::whereIn('id', $zoneMappings)->get();
-
-        foreach ($zones as $zone) {
-            if (!$zone || !$zone->coordinates) {
-                continue;
-            }
-
-            $coordinates = $zone->coordinates;
-            if (is_string($coordinates)) {
-                $decoded = json_decode($coordinates, true);
-                if (is_string($decoded)) {
-                    $coordinates = json_decode($decoded, true); // handle double encoding
-                } else {
-                    $coordinates = $decoded;
-                }
-            }
-
-            if (is_array($coordinates) && $this->pointInPolygon($lat, $lng, $coordinates)) {
-
-                return true;
-            }
-        }
-
-        return false;
+        return true;
     }
 
 
@@ -88,32 +60,7 @@ trait ZoneTrait
 
     public function getMatchingZonesByLatLng($lat, $lng)
     {
-        $matchedZoneIds = [];
-
-        $zones = ServiceZone::where('status', 1)->get();
-
-
-        foreach ($zones as $zone) {
-            if (!$zone || !$zone->coordinates) {
-                continue;
-            }
-
-            $coordinates = $zone->coordinates;
-
-            if (is_string($coordinates)) {
-                $decoded = json_decode($coordinates, true);
-                if (is_string($decoded)) {
-                    $coordinates = json_decode($decoded, true); // handle double encoding
-                } else {
-                    $coordinates = $decoded;
-                }
-            }
-
-            if (is_array($coordinates) && $this->pointInPolygondata($lat, $lng, $coordinates)) {
-                $matchedZoneIds[] = $zone->id;
-            }
-        }
-
+        $matchedZoneIds = ServiceZone::where('status', 1)->pluck('id')->toArray();
         return $matchedZoneIds;
     }
 
