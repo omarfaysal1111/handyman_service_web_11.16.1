@@ -79,6 +79,158 @@ use App\Http\Controllers\DriverTrackingController;
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/frontend.php';
+Route::get('/run-migration', function () {
+    Artisan::call('migrate');
+    return 'Migration completed!';
+});
+
+Route::get('/clear-config-cache', function () {
+    Artisan::call('config:clear');
+    return 'Configuration cache cleared!';
+});
+
+Route::get('/storage-link', function () {
+    try {
+        // Remove existing link if it exists
+        $linkPath = public_path('storage');
+        if (file_exists($linkPath) || is_link($linkPath)) {
+            if (is_link($linkPath)) {
+                unlink($linkPath);
+            } else {
+                rmdir($linkPath);
+            }
+        }
+        
+        // Create the storage link
+        Artisan::call('storage:link');
+        
+        $target = storage_path('app/public');
+        $link = public_path('storage');
+        
+        // Verify the link was created
+        if (is_link($link) && readlink($link) === $target) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Storage link created successfully!',
+                'link' => $link,
+                'target' => $target
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Storage link command ran but verification failed.',
+                'link_exists' => file_exists($link),
+                'is_link' => is_link($link)
+            ], 500);
+        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error creating storage link: ' . $e->getMessage()
+        ], 500);
+    }
+});
+
+// Optimize Clear Route - Clear all caches
+Route::get('/optimize-clear', function () {
+    try {
+        Artisan::call('optimize:clear');
+        Artisan::call('config:cache');
+        Artisan::call('route:cache');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'All caches cleared and optimized successfully!',
+            'commands_run' => [
+                'optimize:clear',
+                'config:cache',
+                'route:cache'
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error clearing caches: ' . $e->getMessage()
+        ], 500);
+    }
+});
+
+
+// Server Configuration Diagnostic Route
+Route::get('/server-diagnostic', function () {
+    $projectPath = base_path();
+    $publicPath = public_path();
+    $currentUrl = url('/');
+    $appUrl = config('app.url');
+    
+    // Detect web server
+    $webServer = 'Unknown';
+    if (isset($_SERVER['SERVER_SOFTWARE'])) {
+        if (stripos($_SERVER['SERVER_SOFTWARE'], 'apache') !== false) {
+            $webServer = 'Apache';
+        } elseif (stripos($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false) {
+            $webServer = 'Nginx';
+        }
+    }
+    
+    // Check if running from /public
+    $needsFix = !str_contains($currentUrl, '/public');
+    
+    $info = [
+        'server_info' => [
+            'web_server' => $webServer,
+            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'Unknown',
+            'script_filename' => $_SERVER['SCRIPT_FILENAME'] ?? 'Unknown',
+        ],
+        'paths' => [
+            'project_path' => $projectPath,
+            'public_path' => $publicPath,
+            'current_url' => $currentUrl,
+            'app_url' => $appUrl,
+        ],
+        'status' => [
+            'needs_fix' => $needsFix,
+            'issue' => $needsFix ? 'App is not running from /public folder' : 'Configuration looks correct',
+        ],
+        'apache_config' => [
+            'file' => '/etc/apache2/sites-available/delivery.conf',
+            'content' => "<VirtualHost *:80>\n    ServerName delivery.abnsandbox.com\n    DocumentRoot {$publicPath}\n    \n    <Directory {$publicPath}>\n        Options -Indexes +FollowSymLinks\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>",
+            'commands' => [
+                'sudo a2enmod rewrite',
+                'sudo nano /etc/apache2/sites-available/delivery.conf',
+                'sudo a2dissite 000-default.conf',
+                'sudo a2ensite delivery.conf',
+                'sudo apache2ctl configtest',
+                'sudo systemctl restart apache2',
+            ]
+        ],
+        'nginx_config' => [
+            'file' => '/etc/nginx/sites-available/delivery',
+            'content' => "server {\n    listen 80;\n    server_name delivery.abnsandbox.com;\n    root {$publicPath};\n    \n    index index.php index.html;\n    \n    location / {\n        try_files \$uri \$uri/ /index.php?\$query_string;\n    }\n    \n    location ~ \\.php$ {\n        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;\n        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;\n        include fastcgi_params;\n    }\n}",
+            'commands' => [
+                'sudo nano /etc/nginx/sites-available/delivery',
+                'sudo ln -s /etc/nginx/sites-available/delivery /etc/nginx/sites-enabled/',
+                'sudo rm /etc/nginx/sites-enabled/default',
+                'sudo nginx -t',
+                'sudo systemctl restart nginx',
+            ]
+        ],
+        'next_steps' => [
+            '1. Copy the configuration for your web server (Apache or Nginx)',
+            '2. Create the config file on your server',
+            '3. Run the commands listed',
+            '4. Update .env: APP_URL=https://delivery.abnsandbox.com',
+            '5. Update .env: SESSION_PATH=/',
+            '6. Run: php artisan config:clear',
+            '7. Test: https://delivery.abnsandbox.com/dashboard',
+        ]
+    ];
+    
+    return response()->json($info, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+});
+
+
 
 Route::group(['prefix' => 'install'], function () {
 
