@@ -25,12 +25,53 @@ function authSession($force = false)
 
 function comman_message_response($message, $status_code = 200)
 {
-    return response()->json(['message' => $message], $status_code);
+    return response()->json([
+        'status' => $status_code < 400,
+        'message' => $message,
+    ], $status_code);
 }
 
 function comman_custom_response($response, $status_code = 200)
 {
-    return response()->json($response, $status_code);
+    if (!is_array($response)) {
+        return response()->json([
+            'status' => $status_code < 400,
+            'message' => $status_code < 400 ? 'Success' : 'Something went wrong.',
+            'data' => $response,
+        ], $status_code);
+    }
+
+    $normalized = $response;
+
+    if (!array_key_exists('status', $normalized)) {
+        if (array_key_exists('success', $normalized)) {
+            $normalized['status'] = (bool) $normalized['success'];
+        } else {
+            $normalized['status'] = $status_code < 400;
+        }
+    }
+
+    if (!array_key_exists('message', $normalized)) {
+        $normalized['message'] = $normalized['status'] ? 'Success' : 'Something went wrong.';
+    }
+
+    if (
+        !array_key_exists('data', $normalized) &&
+        !array_key_exists('pagination', $normalized) &&
+        count($normalized) > 0
+    ) {
+        $keys = array_keys($normalized);
+        $hasNonMetaKeys = array_diff($keys, ['status', 'message', 'success']);
+        if (!empty($hasNonMetaKeys)) {
+            $normalized = [
+                'status' => $normalized['status'],
+                'message' => $normalized['message'],
+                'data' => array_diff_key($normalized, array_flip(['status', 'message', 'success'])),
+            ];
+        }
+    }
+
+    return response()->json($normalized, $status_code);
 }
 
 function checkMenuRoleAndPermission($menu)

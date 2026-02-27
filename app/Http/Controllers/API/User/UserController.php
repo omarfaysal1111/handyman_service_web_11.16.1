@@ -387,7 +387,11 @@ class UserController extends Controller
                 return comman_message_response($message, 406);
             }
 
-            return response()->json(['data' => $success], 200);
+            return response()->json([
+                'status' => true,
+                'message' => __('messages.login_success'),
+                'data' => $success
+            ], 200);
         } else {
             $message = trans('auth.failed');
             return comman_message_response($message, 406);

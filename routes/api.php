@@ -192,7 +192,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
     Route::post('save-provider-slot', [App\Http\Controllers\ProviderSlotController::class, 'store']);
+    Route::post('provider-all-services-timeslots', [API\ProviderSlotController::class, 'providerAllServicesTimeslots']);
     Route::get('get-provider-slot', [API\ProviderSlotController::class, 'getProviderSlot']);
+    Route::get('get-service-slot', [API\ProviderSlotController::class, 'getServiceSlot']);
+    Route::post('save-service-slot', [API\ProviderSlotController::class, 'saveServiceSlot']);
 
 
     Route::post('package-save', [App\Http\Controllers\ServicePackageController::class, 'store']);
@@ -251,6 +254,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('driver-booking-status', [API\DriverController::class, 'driverBookingStatus']);
     Route::post('cancel-driver-request', [API\DriverController::class, 'cancelDriverRequest']);
     Route::post('update-driver-location', [API\DriverController::class, 'updateDriverLocation']);
+    Route::get('driver-orders', [API\DriverController::class, 'driverOrders']);
 
     // PhonePe routes - support both v1 and v2 based on configuration
     Route::post('/phonepe/initiate', [API\BookingController::class, 'initiate']);

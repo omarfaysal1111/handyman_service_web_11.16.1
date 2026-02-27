@@ -823,7 +823,7 @@ class BookingController extends Controller
         $data['datetime'] = $datetime_in_timezone->toDateTimeString();
 
         $message = __('messages.location_update');
-        return response()->json(['data' => $data, 'message' => $message], 200);
+        return response()->json(['status' => true, 'data' => $data, 'message' => $message], 200);
     }
 
     public function getLocation(Request $request)
@@ -836,7 +836,7 @@ class BookingController extends Controller
                 ->first();
         });
         if (!$latestLiveLocation) {
-            return response()->json(['error' => 'Live location not found for this booking ID'], 404);
+            return response()->json(['status' => false, 'message' => 'Live location not found for this booking ID'], 404);
         }
 
         $time_zone = getTimeZone();
@@ -851,7 +851,7 @@ class BookingController extends Controller
         ];
 
         $message = __('messages.location_update');
-        return response()->json(['data' => $data, 'message' => $message], 200);
+        return response()->json(['status' => true, 'data' => $data, 'message' => $message], 200);
     }
 
     public function initiate(Request $request)

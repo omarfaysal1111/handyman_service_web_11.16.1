@@ -227,6 +227,36 @@ class DriverController extends Controller
         ]);
     }
 
+    public function driverOrders(Request $request)
+    {
+        $perPage = $request->per_page ?? config('constant.PER_PAGE_LIMIT', 10);
+        $driverId = auth()->id();
+
+        $orders = DriverBooking::with(['booking', 'driver'])
+            ->where('driver_id', $driverId)
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
+
+        return comman_custom_response([
+            'pagination' => [
+                'total_items' => $orders->total(),
+                'per_page' => $orders->perPage(),
+                'currentPage' => $orders->currentPage(),
+                'totalPages' => $orders->lastPage(),
+                'from' => $orders->firstItem(),
+                'to' => $orders->lastItem(),
+                'next_page' => $orders->nextPageUrl(),
+                'previous_page' => $orders->previousPageUrl(),
+            ],
+            'data' => $orders->items(),
+            'message' => 'Driver orders fetched successfully.',
+            'success' => true,
+        ]);
+    }
+
     private function calculateDistance($lat1, $lon1, $lat2, $lon2, $unit = 'km')
     {
         $earthRadius = $unit === 'km' ? 6371 : 3959;
