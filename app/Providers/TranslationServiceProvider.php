@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
+use Throwable;
 use Schema;
 class TranslationServiceProvider extends ServiceProvider
 {
@@ -15,27 +16,38 @@ class TranslationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Cache::rememberForever('translations', function () {
-            $translations = collect();
-            $language_option =["ar","nl","en","fr","de","hi","it"];
+        try {
+            Cache::rememberForever('translations', function () {
+                return $this->buildTranslations();
+            });
+        } catch (Throwable $e) {
+            // Fallback for environments where database cache store is enabled but cache table doesn't exist yet.
+            $this->app->instance('translations.fallback', $this->buildTranslations());
+        }
+    }
 
-            if( Schema::hasTable('settings')) {
-                if(\Session::get('setup_data') == ''){
-                    $setup_data = sitesetupSession('get');
-                    if ($setup_data) {
-                        $language_option = $setup_data->language_option;
-                    }
+    private function buildTranslations()
+    {
+        $translations = collect();
+        $language_option = ["ar", "nl", "en", "fr", "de", "hi", "it"];
+
+        if (Schema::hasTable('settings')) {
+            if (\Session::get('setup_data') == '') {
+                $setup_data = sitesetupSession('get');
+                if ($setup_data) {
+                    $language_option = $setup_data->language_option;
                 }
             }
-            foreach ($language_option as $locale) { // suported locales
-                $translations[$locale] = [
-                    'php' => $this->phpTranslations($locale),
-                    'json' => $this->jsonTranslations($locale),
-                ];
-            }
+        }
 
-            return $translations;
-        });
+        foreach ($language_option as $locale) { // supported locales
+            $translations[$locale] = [
+                'php' => $this->phpTranslations($locale),
+                'json' => $this->jsonTranslations($locale),
+            ];
+        }
+
+        return $translations;
     }
 
     private function phpTranslations($locale)

@@ -1,0 +1,807 @@
+{
+  "info": {
+    "name": "Provider Mobile App APIs",
+    "_postman_id": "b56fb7a7-7ec9-4d20-9ab1-0bb9ab8f9f40",
+    "description": "Provider-side mobile API collection for Laravel backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://wagonow.com"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "provider_id",
+      "value": "1"
+    },
+    {
+      "key": "booking_id",
+      "value": "1"
+    },
+    {
+      "key": "driver_booking_id",
+      "value": "1"
+    },
+    {
+      "key": "latitude",
+      "value": "24.8607"
+    },
+    {
+      "key": "longitude",
+      "value": "67.0011"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"provider@example.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Social Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login_type\": \"google\",\n  \"uid\": \"google_uid_123\",\n  \"email\": \"provider@gmail.com\",\n  \"first_name\": \"Provider\",\n  \"last_name\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/social-login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "social-login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"12345678\",\n  \"new_password\": \"123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "change-password"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile & Config",
+      "item": [
+        {
+          "name": "Configurations",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/configurations?is_authenticated=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "configurations"
+              ],
+              "query": [
+                {
+                  "key": "is_authenticated",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "User Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/user-detail?id={{provider_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user-detail"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{provider_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "{{provider_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "first_name",
+                  "value": "Provider",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "contact_number",
+                  "value": "1234567890",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/update-profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "update-profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Switch Language",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"locale\": \"en\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/switch-language",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "switch-language"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Listing",
+      "item": [
+        {
+          "name": "Provider Dashboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/provider-dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "provider-dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Booking List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/booking-list?per_page=10&page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "booking-list"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Booking Detail",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{booking_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/booking-detail",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "booking-detail"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User List (Handyman)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/user-list?user_type=handyman&provider_id={{provider_id}}&per_page=10&page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user-list"
+              ],
+              "query": [
+                {
+                  "key": "user_type",
+                  "value": "handyman"
+                },
+                {
+                  "key": "provider_id",
+                  "value": "{{provider_id}}"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Booking Actions",
+      "item": [
+        {
+          "name": "Booking Update",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{booking_id}},\n  \"status\": \"accepted\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/booking-update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "booking-update"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{booking_id}},\n  \"handyman_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/booking-assigned",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "booking-assigned"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Booking Status List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/booking-status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "booking-status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Location Tracking",
+      "item": [
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/update-location?booking_id={{booking_id}}&latitude={{latitude}}&longitude={{longitude}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "update-location"
+              ],
+              "query": [
+                {
+                  "key": "booking_id",
+                  "value": "{{booking_id}}"
+                },
+                {
+                  "key": "latitude",
+                  "value": "{{latitude}}"
+                },
+                {
+                  "key": "longitude",
+                  "value": "{{longitude}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Location",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/get-location?booking_id={{booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "get-location"
+              ],
+              "query": [
+                {
+                  "key": "booking_id",
+                  "value": "{{booking_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Driver Flow",
+      "item": [
+        {
+          "name": "Find Drivers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": {{latitude}},\n  \"longitude\": {{longitude}},\n  \"radius\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/find-drivers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "find-drivers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Request Driver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{booking_id}},\n  \"driver_id\": 2,\n  \"pickup_latitude\": {{latitude}},\n  \"pickup_longitude\": {{longitude}},\n  \"drop_latitude\": 24.8710,\n  \"drop_longitude\": 67.0090,\n  \"pickup_address\": \"Pickup Point\",\n  \"drop_address\": \"Drop Point\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/request-driver",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "request-driver"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Driver Booking Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/driver-booking-status?booking_id={{booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "driver-booking-status"
+              ],
+              "query": [
+                {
+                  "key": "booking_id",
+                  "value": "{{booking_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Driver Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"driver_booking_id\": {{driver_booking_id}},\n  \"latitude\": {{latitude}},\n  \"longitude\": {{longitude}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/update-driver-location",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "update-driver-location"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Driver Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/driver-orders?per_page=10&page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "driver-orders"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Provider Slots",
+      "item": [
+        {
+          "name": "Get Provider Slot",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/get-provider-slot?provider_id={{provider_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "get-provider-slot"
+              ],
+              "query": [
+                {
+                  "key": "provider_id",
+                  "value": "{{provider_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Provider All Services Timeslots",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/provider-all-services-timeslots?provider_id={{provider_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "provider-all-services-timeslots"
+              ],
+              "query": [
+                {
+                  "key": "provider_id",
+                  "value": "{{provider_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Service Slot",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/get-service-slot?provider_id={{provider_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "get-service-slot"
+              ],
+              "query": [
+                {
+                  "key": "provider_id",
+                  "value": "{{provider_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save Service Slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider_id\": {{provider_id}},\n  \"slots\": [\n    {\n      \"day\": \"mon\",\n      \"time\": [\"09:00\", \"10:00\", \"11:00\"]\n    },\n    {\n      \"day\": \"tue\",\n      \"time\": [\"09:00\", \"10:00\"]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/save-service-slot",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "save-service-slot"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet & Payment",
+      "item": [
+        {
+          "name": "User Wallet Balance",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/user-wallet-balance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user-wallet-balance"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Wallet History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/wallet-history?per_page=10&page=1&orderby=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "wallet-history"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "orderby",
+                  "value": "desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment Gateways",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/payment-gateways",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payment-gateways"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
