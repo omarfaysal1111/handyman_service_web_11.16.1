@@ -89,15 +89,15 @@
                               </div>
                            </div>
 
-                           <!-- Zone Selection for Provider -->
-                              <div class="col-lg-12 select2" id="zone_section" style="display: none;">
-                                 <div class="form-group">
-                                    <label for="zone_id" class="text-secondary">{{ __('messages.select_zone') }} <span class="text-danger">*</span></label>
-                                    <select name="zone_id[]" class="form-select select2 mb-5" id="zone_id" style="width:100%" multiple="multiple">
+                           <!-- Zone Selection for Provider (optional) -->
+                           <div class="col-lg-12 select2" id="zone_section" style="display: none;">
+                              <div class="form-group">
+                                 <label for="zone_id" class="text-secondary">{{ __('messages.select_zone') }}</label>
+                                 <select name="zone_id[]" class="form-select select2 mb-5" id="zone_id" style="width:100%" multiple="multiple">
 
-                                    </select>
-                                 </div>
+                                 </select>
                               </div>
+                           </div>
 
                            <!-- Provider Section -->
                            <div class="col-lg-12" id="provider_section" style="display: none;">

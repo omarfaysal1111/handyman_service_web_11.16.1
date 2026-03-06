@@ -44,9 +44,14 @@
     $pageTitle = $routeToTitleMap[$currentRoute] ?? '';
 
     // Get theme color from database (same table as admin)
-    $themeSetup = \DB::table('settings')->where('type', 'theme-setup')->where('key', 'theme-setup')->first();
-    $themeData = $themeSetup ? json_decode($themeSetup->value, true) : null;
-    $primaryColorFromDB = $themeData['primary_color'] ?? null;
+    $primaryColorFromDB = null;
+    try {
+        $themeSetup = \DB::table('settings')->where('type', 'theme-setup')->where('key', 'theme-setup')->first();
+        $themeData = $themeSetup ? json_decode($themeSetup->value, true) : null;
+        $primaryColorFromDB = $themeData['primary_color'] ?? null;
+    } catch (\Throwable $e) {
+        // Allow landing pages to render even if DB isn't reachable yet.
+    }
 @endphp
 @if ($pageTitle)
     <title> {{ $pageTitle ?? $seo_name }}</title>
@@ -64,10 +69,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 @php
-    $seo = App\Models\Setting::where('type', 'general-setting')->where('key', 'general-setting')->first();
-    $seo_value = $seo ? json_decode($seo->value, true) : null;
-
-    $seo_name = $seo_value['site_name'] ?? '';
+    $seo_name = '';
+    try {
+        $seo = App\Models\Setting::where('type', 'general-setting')->where('key', 'general-setting')->first();
+        $seo_value = $seo ? json_decode($seo->value, true) : null;
+        $seo_name = $seo_value['site_name'] ?? '';
+    } catch (\Throwable $e) {
+        // Allow landing pages to render even if DB isn't reachable yet.
+    }
 @endphp
 
 @if (!$pageTitle)
@@ -132,11 +141,17 @@
     $currentLang = app()->getLocale();
     $langFolderPath = resource_path("lang/$currentLang");
     $filePaths = \File::files($langFolderPath);
-    $sitesetup = App\Models\Setting::where('type', 'site-setup')->where('key', 'site-setup')->first();
-    $date_time = $sitesetup ? json_decode($sitesetup->value, true) : null;
-
-    $dateformate = $date_time ? $date_time['date_format'] : 'Y-m-d';
-    $serviceconfig = App\Models\Setting::getValueByKey('service-configurations', 'service-configurations');
+    $date_time = null;
+    $dateformate = 'Y-m-d';
+    $serviceconfig = null;
+    try {
+        $sitesetup = App\Models\Setting::where('type', 'site-setup')->where('key', 'site-setup')->first();
+        $date_time = $sitesetup ? json_decode($sitesetup->value, true) : null;
+        $dateformate = $date_time ? ($date_time['date_format'] ?? 'Y-m-d') : 'Y-m-d';
+        $serviceconfig = App\Models\Setting::getValueByKey('service-configurations', 'service-configurations');
+    } catch (\Throwable $e) {
+        // Allow landing pages to render even if DB isn't reachable yet.
+    }
 @endphp
 
 @foreach ($filePaths as $filePath)

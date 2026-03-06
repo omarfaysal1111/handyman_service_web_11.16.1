@@ -13,9 +13,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // This migration is destructive and can fail on existing installs due to FKs.
+        // Use FK-check toggling to ensure consistent behavior across MySQL versions.
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+
         // Delete all bindings to services first to avoid foreign key constraints errors
         DB::table('booking_handyman_mappings')->truncate();
         DB::table('booking_ratings')->truncate();
+        DB::table('payment_histories')->truncate();
         DB::table('payments')->truncate();
         DB::table('bookings')->truncate();
         DB::table('services')->truncate();
@@ -31,6 +36,8 @@ return new class extends Migration
         ];
 
         DB::table('categories')->insert($categories);
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     /**

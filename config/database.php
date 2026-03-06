@@ -67,9 +67,15 @@ return [
                     // 'NO_AUTO_CREATE_USER',
                     'NO_ENGINE_SUBSTITUTION'
             ],
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter((function () {
+                $sslCaKey = defined('Pdo\\Mysql::ATTR_SSL_CA')
+                    ? \Pdo\Mysql::ATTR_SSL_CA
+                    : (defined('PDO::MYSQL_ATTR_SSL_CA') ? \PDO::MYSQL_ATTR_SSL_CA : null);
+
+                return $sslCaKey === null
+                    ? []
+                    : [$sslCaKey => env('MYSQL_ATTR_SSL_CA')];
+            })()) : [],
         ],
 
         'pgsql' => [

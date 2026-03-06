@@ -1,10 +1,21 @@
 <!-- Backend Bundle JavaScript -->
+<script src="{{ asset('vendor.js') }}"></script>
  <script src="{{ asset('js/backend-bundle.min.js')}}"></script>
+@if (file_exists(public_path('vendor/tinymce/js/tinymce/tinymce.min.js')))
 <script src="{{ asset('vendor/tinymce/js/tinymce/tinymce.min.js') }}"></script>
+@endif
+@if (file_exists(public_path('vendor/tinymce/js/tinymce/jquery.tinymce.min.js')))
 <script src="{{ asset('vendor/tinymce/js/tinymce/jquery.tinymce.min.js') }}"></script>
+@endif
+@if (file_exists(public_path('css/dragula.css')))
 <link href="{{ asset('css/dragula.css') }}" rel="stylesheet">
+@endif
+@if (file_exists(public_path('js/dragula.min.js')))
 <script src="{{ asset('js/dragula.min.js') }}"></script>
+@endif
+@if (file_exists(public_path('js/swiper-bundle.min.js')))
 <script src="{{ asset('js/swiper-bundle.min.js') }}"></script>
+@endif
 
 <script>
       // Set the primary locale (default language)
@@ -575,38 +586,64 @@
  @yield('bottom_script')
 
  <!-- Flextree Javascript-->
+ @if (file_exists(public_path('vendor/magnific-popup/jquery.magnific-popup.min.js')))
  <script src="{{ asset('vendor/magnific-popup/jquery.magnific-popup.min.js') }}" defer></script>
+ @endif
+ @if (file_exists(public_path('js/flex-tree.min.js')))
  <script src="{{ asset('js/flex-tree.min.js')}}" defer></script>
+ @endif
+ @if (file_exists(public_path('js/tree.js')))
  <script src="{{ asset('js/tree.js')}}" defer></script>
+ @endif
 
  <!-- Table Treeview JavaScript -->
  <!-- <script src="{{ asset('js/table-treeview.js')}}"></script> -->
 
  <!-- SweetAlert JavaScript -->
+ @if (file_exists(public_path('js/sweetalert.js')))
  <script src="{{ asset('js/sweetalert.js')}}"></script>
+ @endif
 
  <!-- Vectoe Map JavaScript -->
+ @if (file_exists(public_path('js/vector-map-custom.js')))
  <script src="{{ asset('js/vector-map-custom.js')}}"></script>
+ @endif
 
  <!-- Chart Custom JavaScript -->
+ @if (file_exists(public_path('js/customizer.js')))
  <script src="{{ asset('js/customizer.js')}}"></script>
+ @endif
 
+ @if (file_exists(public_path('vendor/confirmJs/confirm.min.js')))
  <script src="{{ asset('vendor/confirmJs/confirm.min.js')}}"></script>
+ @endif
 
+ @if (file_exists(public_path('vendor/vanillajs-datepicker/dist/js/datepicker-full.js')))
  <script src="{{ asset('vendor/vanillajs-datepicker/dist/js/datepicker-full.js')}}"></script>
+ @endif
 
+ @if (file_exists(public_path('js/charts/progressbar.js')))
  <script src="{{ asset('js/charts/progressbar.js')}}"></script>
+ @endif
 
  <!-- Chart Custom JavaScript -->
+ @if (file_exists(public_path('js/chart-custom.js')))
  <script src="{{ asset('js/chart-custom.js')}}"></script>
+ @endif
+ @if (file_exists(public_path('js/charts/01.js')))
  <script src="{{ asset('js/charts/01.js')}}"></script>
+ @endif
+ @if (file_exists(public_path('js/charts/02.js')))
  <script src="{{ asset('js/charts/02.js')}}"></script>
+ @endif
 
  <!-- slider JavaScript -->
  <!-- <script src="{{ asset('js/slider.js')}}"></script> -->
 
  <!-- Emoji picker -->
+ @if (file_exists(public_path('vendor/emoji-picker-element/index.js')))
  <script src="{{ asset('vendor/emoji-picker-element/index.js')}}" type="module"></script>
+ @endif
  @if(isset($assets) && (in_array('datatable',$assets) || in_array('datatable_builder',$assets)))
     <script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('vendor/datatables/js/dataTables.bootstrap4.min.js') }}"></script>
@@ -622,5 +659,7 @@
     <script src="{{ asset('vendor/fullcalendar/list/main.js') }}"></script>
     <script src="{{ asset('vendor/fullcalendar/bootstrap/main.js') }}"></script>
  <!-- app JavaScript -->
+   @if (file_exists(public_path('js/app.js')))
    <script src="{{ asset('js/app.js')}}"></script>
+   @endif
  @include('helper.app_message')

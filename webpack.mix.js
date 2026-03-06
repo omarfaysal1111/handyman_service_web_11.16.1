@@ -21,6 +21,8 @@ mix.js('resources/js/backend-bundle.js', 'public/js/backend-bundle.min.js')
         processCssUrls: false
     });
 
+mix.disableNotifications();
+
 mix.alias({
     '@': path.join(__dirname, 'resources/js')
 });

@@ -38,14 +38,16 @@ class RegisteredUserController extends Controller
     public function store(Request $request)
     {
         $baseRules = [
-            'username'  => 'required|string|max:255|unique:users',
+            'username'   => 'required|string|max:255|unique:users',
             'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed|min:8',
-            'document_id' => 'required_if:usertype,provider|array',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|string|email|max:255|unique:users',
+            'password'   => 'required|string|confirmed|min:8',
+            'document_id'   => 'required_if:usertype,provider|array',
             'document_id.*' => 'exists:documents,id',
-             'zone_id' => 'nullable|required_if:usertype,provider|exists:service_zones,id',
+            // Zone is optional on register; validate only when present
+            'zone_id'   => 'nullable|array',
+            'zone_id.*' => 'exists:service_zones,id',
         ];
 
 

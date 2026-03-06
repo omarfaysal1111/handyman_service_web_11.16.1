@@ -10,9 +10,14 @@
 
         @php
             // Get theme color from database
-            $themeSetup = \DB::table('settings')->where('type', 'theme-setup')->where('key', 'theme-setup')->first();
-            $themeData = $themeSetup ? json_decode($themeSetup->value, true) : null;
-            $primaryColorFromDB = $themeData['primary_color'] ?? null;
+            $primaryColorFromDB = null;
+            try {
+                $themeSetup = \DB::table('settings')->where('type', 'theme-setup')->where('key', 'theme-setup')->first();
+                $themeData = $themeSetup ? json_decode($themeSetup->value, true) : null;
+                $primaryColorFromDB = $themeData['primary_color'] ?? null;
+            } catch (\Throwable $e) {
+                // Allow guest pages to render even if DB isn't reachable yet.
+            }
         @endphp
 
         <link rel="shortcut icon" class="site_favicon_preview" href="{{ getSingleMedia(imageSession('get'),'favicon',null) }}" />
@@ -24,6 +29,7 @@
 
 
         <!-- Styles -->
+        <link rel="stylesheet" href="{{ asset('vendor.css') }}">
         <link rel="stylesheet" href="{{ asset('css/backend.css') }}">
         <link rel="stylesheet" href="{{ asset('css/fronted-custom.css') }}">
 

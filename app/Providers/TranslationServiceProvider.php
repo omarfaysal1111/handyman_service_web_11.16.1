@@ -31,13 +31,17 @@ class TranslationServiceProvider extends ServiceProvider
         $translations = collect();
         $language_option = ["ar", "nl", "en", "fr", "de", "hi", "it"];
 
-        if (Schema::hasTable('settings')) {
-            if (\Session::get('setup_data') == '') {
-                $setup_data = sitesetupSession('get');
-                if ($setup_data) {
-                    $language_option = $setup_data->language_option;
+        try {
+            if (Schema::hasTable('settings')) {
+                if (\Session::get('setup_data') == '') {
+                    $setup_data = sitesetupSession('get');
+                    if ($setup_data) {
+                        $language_option = $setup_data->language_option;
+                    }
                 }
             }
+        } catch (Throwable $e) {
+            // During install/first boot the DB might not be reachable yet.
         }
 
         foreach ($language_option as $locale) { // supported locales

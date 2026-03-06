@@ -475,8 +475,13 @@ function imageSession($type = 'get')
     }
     switch ($type) {
         case "set":
-            $settings = \App\Models\Setting::where('type', 'theme-setup')->where('key', 'theme-setup')->first();
-            \Session::put('images_data', $settings);
+            try {
+                $settings = \App\Models\Setting::where('type', 'theme-setup')->where('key', 'theme-setup')->first();
+                \Session::put('images_data', $settings);
+            } catch (\Throwable $e) {
+                // During install / first boot the DB might not be reachable yet.
+                \Session::put('images_data', null);
+            }
             break;
         default:
             break;
@@ -491,10 +496,15 @@ function sitesetupSession($type = 'get')
     }
     switch ($type) {
         case "set":
-            $sitesetup = App\Models\Setting::where('type', 'site-setup')->where('key', 'site-setup')->first();
-            $settings = $sitesetup ? json_decode($sitesetup->value) : null;
-            if (!empty($settings)) {
-                \Session::put('setup_data', $settings);
+            try {
+                $sitesetup = App\Models\Setting::where('type', 'site-setup')->where('key', 'site-setup')->first();
+                $settings = $sitesetup ? json_decode($sitesetup->value) : null;
+                if (!empty($settings)) {
+                    \Session::put('setup_data', $settings);
+                }
+            } catch (\Throwable $e) {
+                // During install / first boot the DB might not be reachable yet.
+                \Session::put('setup_data', null);
             }
 
             break;
@@ -2431,11 +2441,19 @@ if (!function_exists('getFooterSettings')) {
 
 function getSettingValue($property)
 {
-    $setting = \App\Models\Setting::where('key', 'OTHER_SETTING')->first();
-    if ($setting) {
-        $data = json_decode($setting->value, true);
-        return isset($data[$property]) ? $data[$property] : null;
+    try {
+        $setting = \App\Models\Setting::where('type', 'OTHER_SETTING')
+            ->where('key', 'OTHER_SETTING')
+            ->first();
+
+        if ($setting) {
+            $data = json_decode($setting->value, true);
+            return isset($data[$property]) ? $data[$property] : null;
+        }
+    } catch (\Throwable $e) {
+        // During install / first boot the DB might not be reachable yet.
     }
+
     return null;
 }
 
@@ -2455,7 +2473,12 @@ function getMetaTagsForPage()
     ];
     $locale = session()->get('locale', 'en');
 
-    $globalSeoSetting = \App\Models\SeoSetting::first();
+    $globalSeoSetting = null;
+    try {
+        $globalSeoSetting = \App\Models\SeoSetting::first();
+    } catch (\Throwable $e) {
+        // Allow pages to render even if DB isn't reachable yet.
+    }
     // dd($globalSeoSetting);
     $global = [
         'meta_title' => '',

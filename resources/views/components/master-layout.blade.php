@@ -36,13 +36,20 @@
     {{-- <title>{{ config('app.name', 'Laravel') }}</title> --}}
 
     @php
-        $generalSetting = \DB::table('settings')->where('key', 'general-setting')->value('value');
-        $siteName = $generalSetting ? json_decode($generalSetting, true)['site_name'] ?? null : null;
+        $siteName = null;
+        $primaryColorFromDB = null;
 
-        // Get theme color from database
-        $themeSetup = \DB::table('settings')->where('type', 'theme-setup')->where('key', 'theme-setup')->first();
-        $themeData = $themeSetup ? json_decode($themeSetup->value, true) : null;
-        $primaryColorFromDB = $themeData['primary_color'] ?? null;
+        try {
+            $generalSetting = \DB::table('settings')->where('key', 'general-setting')->value('value');
+            $siteName = $generalSetting ? (json_decode($generalSetting, true)['site_name'] ?? null) : null;
+
+            // Get theme color from database
+            $themeSetup = \DB::table('settings')->where('type', 'theme-setup')->where('key', 'theme-setup')->first();
+            $themeData = $themeSetup ? json_decode($themeSetup->value, true) : null;
+            $primaryColorFromDB = $themeData['primary_color'] ?? null;
+        } catch (\Throwable $e) {
+            // Allow app to render even if DB isn't reachable yet.
+        }
     @endphp
 
     {{-- <title>{{ $siteName ?? 'Laravel' }}</title>
