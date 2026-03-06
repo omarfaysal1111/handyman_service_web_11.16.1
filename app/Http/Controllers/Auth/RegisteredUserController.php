@@ -110,7 +110,9 @@ class RegisteredUserController extends Controller
                 "provider_id" => $request->provider_id,
                 "providertype_id" => $request->providertype_id,
                 "handymantype_id" => $request->handymantype_id,
-                'status' => ($userType === 'provider' || $userType === 'handyman') ? 0 : 1,
+                'status' => 1,
+                'is_email_verified' => 1,
+                'email_verified_at' => now(),
             ]);
 
             if (

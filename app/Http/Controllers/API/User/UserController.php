@@ -88,9 +88,9 @@ class UserController extends Controller
                 }
             }
         }
-        if (in_array($input['user_type'], ['handyman', 'provider'])) {
-            $input['status'] = isset($input['status']) ? $input['status'] : 0;
-        }
+        $input['status'] = 1;
+        $input['is_email_verified'] = 1;
+        $input['email_verified_at'] = now();
         $user = User::withTrashed()
             ->where(function ($query) use ($email, $username) {
                 $query->where('email', $email)->orWhere('username', $username);

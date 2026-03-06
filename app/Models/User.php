@@ -100,8 +100,10 @@ class User extends Authenticatable implements HasMedia
     {
         parent::boot();
 
-        // Auto-generate unique referral code on create
+        // Auto-generate unique referral code and auto-verify email on create
         static::creating(function ($user) {
+            $user->is_email_verified = 1;
+            $user->email_verified_at = now();
             if (empty($user->email)) {
                 $emailLocal = Str::slug(($user->uid ?? $user->username ?? Str::random(8)), '_');
                 $emailLocal = $emailLocal !== '' ? $emailLocal : 'user';
