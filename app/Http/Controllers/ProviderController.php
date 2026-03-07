@@ -812,6 +812,46 @@ public function providerSubscription(Request $request, $id)
         }
     }
 
+    public function activateProviderByEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $email = $request->email;
+
+        $provider = User::where('email', $email)->where('user_type', 'provider')->first();
+
+        if (!$provider) {
+            $message = __('messages.not_found_entry', ['name' => __('messages.provider')]);
+            return comman_message_response($message, 404);
+        }
+
+        if ($provider->status == 1) {
+            $message = __('messages.provider') . ' is already active';
+            return comman_message_response($message, 400);
+        }
+
+        // Update provider status to active
+        $provider->status = 1;
+        $provider->save();
+
+        // Try to send email notification
+        try {
+            $verificationLink = route('verify', ['id' => $provider->id]);
+            Mail::to($provider->email)->send(new AdminApproveEmail($verificationLink));
+        } catch (\Exception $emailError) {
+            \Log::error('Failed to send activation email', [
+                'provider_id' => $provider->id,
+                'email' => $provider->email,
+                'email_error' => $emailError->getMessage()
+            ]);
+        }
+
+        $message = __('messages.approve_successfully');
+        return comman_message_response($message);
+    }
+
     public function getChangePassword(Request $request)
     {
         $id = $request->id;
