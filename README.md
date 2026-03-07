@@ -33,6 +33,7 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
+Run the project using this statment in your terminal:"php artisan serve && npm run dev"
 - **[Vehikl](https://vehikl.com/)**
 - **[Tighten Co.](https://tighten.co)**
 - **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
